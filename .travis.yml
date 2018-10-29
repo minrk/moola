@@ -1,0 +1,37 @@
+language: python
+python:
+  - 3.6
+env:
+  global:
+    - MINICONDA_VERSION=4.5.11
+    - MINICONDA_HASH=e1045ee415162f944b6aebfe560b8fee
+    - CONDA_PREFIX=$HOME/conda
+    - PATH=$CONDA_PREFIX/bin:$PATH
+  matrix:
+    - FENICS=2018.1.0, DOLFIN_ADJOINT=2018.1.0
+
+before_install:
+  - |
+    # install conda
+    curl -L https://repo.continuum.io/miniconda/Miniconda3-${MINICONDA_VERSION}-Linux-x86_64.sh > miniconda.sh
+    echo "$MINICONDA_HASH miniconda.sh" | md5sum -c -
+    bash miniconda.sh -f -b -p $CONDA_PREFIX
+    conda config --add channels conda-forge
+    conda install -yq python=$TRAVIS_PYTHON_VERSION pip
+  - |
+    # install fenics
+    conda install -yq fenics=$FENICS scipy
+  - |
+    # install test requirements
+    pip install pytest
+    if [[ "$DOLFIN_ADJOIN" == "master" ]]; then
+      pip install https://bitbucket.org/dolfin-adjoint/pyadjoint/get/master.tar.gz
+    else
+      pip install dolfin-adjoin==$DOLFIN_ADJOINT
+    fi
+install:
+  - pip install -e .
+  - conda list
+  - pip freeze
+script:
+  - pytest -v
