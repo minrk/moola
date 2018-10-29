@@ -17,5 +17,6 @@ def pytest_runtest_setup(item):
     # Reset dolfin parameter dictionary
     dolfin.parameters.update(default_params)
 
-    # Reset adjoint state
-    dolfin_adjoint.adj_reset()
+    # Reset adjoint state (adj_reset removed in 2018)
+    if hasattr(dolfin_adjoint, 'adj_reset'):
+        dolfin_adjoint.adj_reset()

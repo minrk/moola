@@ -1,12 +1,20 @@
+import logging
+
+import dolfin
 from dolfin import *
-from dolfin_adjoint import solve, Functional, Control, ReducedFunctional, adj_reset
-import moola
+import dolfin_adjoint
+from dolfin_adjoint import solve, Control, ReducedFunctional
 import pytest
-set_log_level(ERROR)
+
+import moola
+
+dolfin.set_log_level(logging.ERROR)
 
 @pytest.fixture
 def moola_problem():
-    adj_reset()
+    # adj_reset removed in dolfin-adjoint 2018
+    if hasattr(dolfin_adjoint, 'adj_reset'):
+        dolfin_adjoint.adj_reset()
     mesh = UnitSquareMesh(256, 256)
     V = FunctionSpace(mesh, "CG", 1)
     f = interpolate(Constant(1), V)
@@ -16,7 +24,7 @@ def moola_problem():
     bc = DirichletBC(V, Constant(0), "on_boundary")
     solve(F == 0, u, bc)
 
-    J = Functional(inner(u, u)*dx)
+    J = moola.Functional(inner(u, u)*dx)
     m = Control(f)
     rf = ReducedFunctional(J, m)
 

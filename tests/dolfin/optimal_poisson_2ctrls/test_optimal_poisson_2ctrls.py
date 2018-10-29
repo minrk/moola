@@ -1,9 +1,13 @@
 """ Solves a MMS problem with smooth control """
+import logging
+
+import dolfin
 from dolfin import *
 from dolfin_adjoint import *
+
 import moola
 
-dolfin.set_log_level(ERROR)
+dolfin.set_log_level(logging.ERROR)
 parameters['std_out_all_processes'] = False
 
 def solve_pde(u, V, f, g):
