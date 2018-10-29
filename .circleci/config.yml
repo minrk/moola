@@ -1,0 +1,46 @@
+# Python CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      # - image: quay.io/fenicsproject/dev:latest
+      - image: quay.io/fenicsproject/stable:latest
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "setup.py" }}
+
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m pip install pytest dolfin-adjoint -e .
+
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "setup.py" }}
+
+      - restore_cache:
+          keys:
+          - v1-dolfin-jit-cache
+
+      # run tests!
+      - run:
+          name: run tests
+          command: |
+            python3 -m pytest -v
+
+      - save_cache:
+          key: v1-dolfin-jit-cache
+          paths:
+            - ~/.cache/instant
+            - ~/.cache/dijitso
